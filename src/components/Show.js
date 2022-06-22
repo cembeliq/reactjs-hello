@@ -1,90 +1,83 @@
 import React from "react"
-import  { Button } from "antd"
-import { Space, Table, Tag } from 'antd';
+import  { Button, Table } from "antd"
+import { 
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link
+ } from 'react-router-dom';
 import './../App.less';
+import Detail from "../pages/Detail";
 
-const columns = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-    render: (text) => <a>{text}</a>,
-  },
-  {
-    title: 'Age',
-    dataIndex: 'age',
-    key: 'age',
-  },
-  {
-    title: 'Address',
-    dataIndex: 'address',
-    key: 'address',
-  },
-  {
-    title: 'Tags',
-    key: 'tags',
-    dataIndex: 'tags',
-    render: (_, { tags }) => (
-      <>
-        {tags.map((tag) => {
-          let color = tag.length > 5 ? 'geekblue' : 'green';
-
-          if (tag === 'loser') {
-            color = 'volcano';
-          }
-
-          return (
-            <Tag color={color} key={tag}>
-              {tag.toUpperCase()}
-            </Tag>
-          );
-        })}
-      </>
-    ),
-  },
-  {
-    title: 'Action',
-    key: 'action',
-    render: (_, record) => (
-      <Space size="middle">
-        <a>Invite {record.name}</a>
-        <a>Delete</a>
-      </Space>
-    ),
-  },
-];
-
-const data = [
-  {
-    key: '1',
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-    tags: ['nice', 'developer'],
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-    tags: ['loser'],
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-    tags: ['cool', 'teacher'],
-  },
-];
 
 class Show extends React.Component {
+  columns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      render: (id) => {
+        return (
+          <Router>
+            <Link to={`/${id}`}>{id}</Link>
+            <Routes>
+              <Route exact path="/:id" caseSensitive={false} element={<Detail />} />
+            </Routes>
+          </Router>
+          
+        )
+      },
+    },
+    {
+      title: 'User ID',
+      dataIndex: 'userId',
+      key: 'userId',
+    },
+    {
+      title: 'Title',
+      dataIndex: 'title',
+      key: 'title',
+    },
+    {
+      title: 'Status',
+      dataIndex: 'completed',
+      key: 'completed',
+      render: (completed) => {
+        return <p>{completed?'Complete':'In Process'}</p>
+      }
+    }
+  ];
+  state = {
+    isLoading: true,
+    data: [],
+    error: null
+  };
+  getFetchData() {
+    this.setState({
+      loading: true
+    }, () => {
+      fetch("https://jsonplaceholder.typicode.com/todos")
+      .then(res => res.json())
+      .then(result => this.setState({
+        loading: false,
+        data: result
+      })).catch(console.log);
+    });
+  }
+  componentDidMount() {
+    this.getFetchData();
+  }
   render() {
+    const {
+      data,
+      error
+    } = this.state;
     return (
       <div className="show-list">
         <h1>Data Customer</h1>
+        {error ? <p>error.message</p> : null}
         <Button type="primary">Tambah</Button>
-        <Table columns={columns} dataSource={data} />;
+        <Table columns={this.columns} dataSource={data} />;
       </div>
     );
   }
